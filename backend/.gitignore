@@ -12,3 +12,6 @@ uploads/
 .env
 .env.*
 !.env.example
+
+# Vercel CLI link folder
+.vercel
