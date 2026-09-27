@@ -64,19 +64,26 @@ On its first start against an empty database the API loads the starter profile c
 delete in the admin stays deleted.
 
 To create the first admin login, run this from the project folder and answer the questions (the
-password is hidden while you type):
+password is hidden while you type). It saves the details to the API project and redeploys it:
 
 ```bash
 node scripts/set-vercel-secrets.mjs --admin
 ```
 
-Then redeploy the API (Vercel → API project → Deployments → ⋯ → Redeploy). The admin is created on the
-next start, only if no admin exists yet. After you have signed in at `https://<website>/admin`, remove the
-stored password:
+About a minute later, sign in at `https://<website>/admin`. Then remove the stored password:
 
 ```bash
 node scripts/set-vercel-secrets.mjs --remove-admin-seed
 ```
+
+### Changing the login later
+
+- **Email or password**: sign in → **Account** → *Change login email* / *Change password*. Both need
+  your current password and sign out your other devices.
+- **Forgot the password**: run `node scripts/set-vercel-secrets.mjs --reset-login`, enter a new password
+  (and optionally a new email). The API redeploys and applies the reset exactly once; a password you
+  change later in the dashboard is never overwritten. Afterwards run `--remove-admin-seed` again.
+  This only works for someone with access to the Vercel account.
 
 The two server secrets (`JWT_SECRET`, `INTERNAL_API_KEY`) are set with
 `node scripts/set-vercel-secrets.mjs` (run again any time to rotate them, then redeploy both projects).

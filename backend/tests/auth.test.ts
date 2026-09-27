@@ -105,6 +105,34 @@ describe('authentication', () => {
     expect((await request(app).post(`${API}/auth/login`).send(ADMIN)).status).toBe(401);
   });
 
+  it('changes the login email with the current password and revokes other sessions', async () => {
+    const agent = await loggedInAgent();
+    const other = request.agent(app);
+    await other.post(`${API}/auth/login`).send(ADMIN);
+
+    const wrong = await agent.post(`${API}/auth/change-email`).send({ currentPassword: 'nope', newEmail: 'new@example.test' });
+    expect(wrong.status).toBe(400);
+    const invalid = await agent.post(`${API}/auth/change-email`).send({ currentPassword: ADMIN.password, newEmail: 'not-an-email' });
+    expect(invalid.status).toBe(400);
+
+    const ok = await agent.post(`${API}/auth/change-email`).send({ currentPassword: ADMIN.password, newEmail: 'New@Example.test' });
+    expect(ok.status).toBe(200);
+    expect(ok.body.data.email).toBe('new@example.test');
+
+    expect((await agent.get(`${API}/auth/me`)).status).toBe(200); // fresh cookie
+    expect((await other.get(`${API}/auth/me`)).status).toBe(401); // other device signed out
+    expect((await request(app).post(`${API}/auth/login`).send(ADMIN)).status).toBe(401); // old email
+    const relogin = await request(app).post(`${API}/auth/login`).send({ email: 'new@example.test', password: ADMIN.password });
+    expect(relogin.status).toBe(200);
+  });
+
+  it('refuses an email that another account already uses', async () => {
+    const agent = await loggedInAgent();
+    await Admin.create({ email: 'taken@example.test', passwordHash: 'x' });
+    const res = await agent.post(`${API}/auth/change-email`).send({ currentPassword: ADMIN.password, newEmail: 'taken@example.test' });
+    expect(res.status).toBe(409);
+  });
+
   it('blocks state-changing requests from disallowed origins', async () => {
     await createAdmin();
     const res = await request(app).post(`${API}/auth/login`).set('Origin', 'https://evil.example').send(ADMIN);

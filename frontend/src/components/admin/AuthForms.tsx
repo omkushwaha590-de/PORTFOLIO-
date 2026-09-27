@@ -148,3 +148,73 @@ export function ChangePasswordForm() {
     </form>
   );
 }
+
+export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [pending, setPending] = useState(false);
+  const [message, setMessage] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
+  const [fieldError, setFieldError] = useState('');
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    setFieldError('');
+    setPending(true);
+    try {
+      const result = await authApi.changeEmail(password, email.trim());
+      setEmail('');
+      setPassword('');
+      setMessage({ kind: 'success', text: `Login email changed to ${result.email}. Other devices have been signed out.` });
+      router.refresh();
+    } catch (err) {
+      if (err instanceof ApiError && err.fieldErrors.newEmail) setFieldError(err.fieldErrors.newEmail);
+      else if (err instanceof ApiError && err.status === 409) setFieldError('Another account already uses this email.');
+      else setMessage({ kind: 'error', text: err instanceof ApiError ? err.message : 'Could not change the email.' });
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="max-w-md space-y-5">
+      <p className="text-sm text-muted">
+        Current login email: <span className="text-fg">{currentEmail}</span>
+      </p>
+      <Field label="New login email" error={fieldError}>
+        {({ id, describedBy, invalid }) => (
+          <input
+            id={id}
+            type="email"
+            autoComplete="email"
+            required
+            aria-describedby={describedBy}
+            aria-invalid={invalid || undefined}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={inputClass}
+          />
+        )}
+      </Field>
+      <Field label="Current password" hint="Required to confirm it is you.">
+        {({ id, describedBy }) => (
+          <input
+            id={id}
+            type="password"
+            autoComplete="current-password"
+            required
+            aria-describedby={describedBy}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={inputClass}
+          />
+        )}
+      </Field>
+      {message && <Notice kind={message.kind}>{message.text}</Notice>}
+      <button type="submit" disabled={pending} className={primary}>
+        {pending ? 'Updating…' : 'Change email'}
+      </button>
+    </form>
+  );
+}

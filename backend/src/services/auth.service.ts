@@ -115,6 +115,20 @@ export async function changePassword(adminId: string, currentPassword: string, n
   return admin;
 }
 
+export async function changeEmail(adminId: string, currentPassword: string, newEmail: string) {
+  const admin = await Admin.findById(adminId).select('+passwordHash');
+  if (!admin) throw AppError.unauthorized();
+
+  const valid = await bcrypt.compare(currentPassword, admin.passwordHash);
+  if (!valid) throw AppError.badRequest('Current password is incorrect');
+  if (admin.email === newEmail) throw AppError.badRequest('That is already your login email');
+
+  admin.email = newEmail; // unique index → 409 if another account uses it
+  admin.tokenVersion += 1; // signs out every other session
+  await admin.save();
+  return admin;
+}
+
 /** Invalidates every token issued to this admin. */
 export async function revokeAllSessions(adminId: string) {
   await Admin.updateOne({ _id: adminId }, { $inc: { tokenVersion: 1 } });

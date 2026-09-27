@@ -7,8 +7,10 @@
  *   node scripts/set-vercel-secrets.mjs          set / rotate JWT_SECRET and INTERNAL_API_KEY
  *   node scripts/set-vercel-secrets.mjs --check  verify access with a harmless test variable
  *   node scripts/set-vercel-secrets.mjs --admin  set the first admin login (asked for, password hidden)
+ *   node scripts/set-vercel-secrets.mjs --reset-login
+ *                                                forgot the password? set a new one (and optionally a new email)
  *   node scripts/set-vercel-secrets.mjs --remove-admin-seed
- *                                                delete the stored admin password after first sign-in
+ *                                                delete stored admin/reset passwords after signing in
  *
  * Requires the Vercel CLI to be logged in (`npx vercel login`). Rotating JWT_SECRET signs out
  * every admin session; redeploy both projects afterwards.
@@ -29,7 +31,7 @@ const workDir = mkdtempSync(path.join(tmpdir(), 'vercel-secrets-'));
 
 function vercelApi(method, endpoint, body) {
   const args = ['--yes', 'vercel', 'api', endpoint, '-X', method, '--raw'];
-  // DELETE is only used for this script's own variables (SETUP_CHECK, ADMIN_SEED_PASSWORD).
+  // DELETE is only used for this script's own variables (SETUP_CHECK, ADMIN_SEED_*/ADMIN_RESET_*).
   if (method === 'DELETE') args.push('--dangerously-skip-permissions');
   let file;
   if (body) {
@@ -113,30 +115,71 @@ function passwordProblem(password) {
   return null;
 }
 
-async function setAdminSeed() {
-  console.log('First admin login for the website dashboard (/admin).');
-  const email = (await ask('Admin email: ')).trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('That does not look like an email address.');
+async function askNewPassword() {
   const password = await ask('Password (hidden): ', { hidden: true });
   const problem = passwordProblem(password);
   if (problem) throw new Error(`Password needs ${problem}. Nothing was saved.`);
   const again = await ask('Repeat password (hidden): ', { hidden: true });
   if (again !== password) throw new Error('Passwords do not match. Nothing was saved.');
+  return password;
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function deleteVariables(project, keys) {
+  const { envs = [] } = vercelApi('GET', `/v10/projects/${project}/env`);
+  const matches = envs.filter((item) => keys.includes(item.key));
+  for (const env of matches) vercelApi('DELETE', `/v9/projects/${project}/env/${env.id}`);
+  return matches.map((env) => env.key);
+}
+
+/** Redeploys the latest production build of the API so new environment values take effect. */
+function redeployApi() {
+  const { deployments = [] } = vercelApi('GET', `/v6/deployments?projectId=${API_PROJECT}&target=production&state=READY&limit=1`);
+  const latest = deployments[0];
+  if (!latest) {
+    console.log('No production deployment found yet: push to GitHub or redeploy the API in Vercel.');
+    return;
+  }
+  vercelApi('POST', '/v13/deployments?forceNew=1', { name: API_PROJECT, deploymentId: latest.uid, target: 'production' });
+  console.log('  ✓ API redeploy started (ready in about a minute)');
+}
+
+async function setAdminSeed() {
+  console.log('First admin login for the website dashboard (/admin).');
+  const email = (await ask('Admin email: ')).trim().toLowerCase();
+  if (!EMAIL_PATTERN.test(email)) throw new Error('That does not look like an email address.');
+  const password = await askNewPassword();
   setVariable(API_PROJECT, 'ADMIN_SEED_EMAIL', email, 'plain');
   setVariable(API_PROJECT, 'ADMIN_SEED_PASSWORD', password);
-  console.log('Saved. The API creates this admin on its next deployment (only if no admin exists yet).');
+  redeployApi();
+  console.log('Done. After the redeploy, sign in at /admin. Then run with --remove-admin-seed.');
+}
+
+async function resetLogin() {
+  console.log('Reset the admin login. Leave the email empty to keep the current one.');
+  const email = (await ask('New login email (optional): ')).trim().toLowerCase();
+  if (email && !EMAIL_PATTERN.test(email)) throw new Error('That does not look like an email address.');
+  const password = await askNewPassword();
+  if (email) setVariable(API_PROJECT, 'ADMIN_RESET_EMAIL', email, 'plain');
+  else deleteVariables(API_PROJECT, ['ADMIN_RESET_EMAIL']);
+  setVariable(API_PROJECT, 'ADMIN_RESET_PASSWORD', password);
+  // A fresh id makes the API apply this reset exactly once.
+  setVariable(API_PROJECT, 'ADMIN_RESET_ID', `reset-${Date.now()}-${randomBytes(4).toString('hex')}`, 'plain');
+  redeployApi();
+  console.log('Done. After the redeploy, sign in with the new details. Then run with --remove-admin-seed.');
 }
 
 function removeAdminSeed() {
-  const { envs = [] } = vercelApi('GET', `/v10/projects/${API_PROJECT}/env`);
-  const matches = envs.filter((item) => item.key === 'ADMIN_SEED_PASSWORD');
-  for (const env of matches) vercelApi('DELETE', `/v9/projects/${API_PROJECT}/env/${env.id}`);
-  console.log(matches.length ? '  ✓ ADMIN_SEED_PASSWORD removed' : 'ADMIN_SEED_PASSWORD was not set.');
+  const removed = deleteVariables(API_PROJECT, ['ADMIN_SEED_PASSWORD', 'ADMIN_RESET_PASSWORD']);
+  console.log(removed.length ? `  ✓ removed: ${removed.join(', ')}` : 'No stored admin passwords were found.');
 }
 
 try {
   if (process.argv.includes('--admin')) {
     await setAdminSeed();
+  } else if (process.argv.includes('--reset-login')) {
+    await resetLogin();
   } else if (process.argv.includes('--remove-admin-seed')) {
     removeAdminSeed();
   } else if (process.argv.includes('--check')) {

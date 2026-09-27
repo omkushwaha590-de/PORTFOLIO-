@@ -3,6 +3,7 @@ import { Admin } from '../models/admin.model';
 import {
   SESSION_COOKIE,
   authenticate,
+  changeEmail,
   changePassword,
   revokeAllSessions,
   sessionCookieOptions,
@@ -48,4 +49,14 @@ export async function updatePassword(req: Request, res: Response) {
   const { token, maxAgeMs } = signSessionToken(String(admin._id), admin.tokenVersion);
   res.cookie(SESSION_COOKIE, token, sessionCookieOptions(maxAgeMs));
   res.json({ data: { updated: true } });
+}
+
+/** POST /auth/change-email — changes the login email, revokes old sessions, issues a fresh cookie. */
+export async function updateEmail(req: Request, res: Response) {
+  const { currentPassword, newEmail } = req.body as { currentPassword: string; newEmail: string };
+  const admin = await changeEmail(req.admin!.id, currentPassword, newEmail);
+
+  const { token, maxAgeMs } = signSessionToken(String(admin._id), admin.tokenVersion);
+  res.cookie(SESSION_COOKIE, token, sessionCookieOptions(maxAgeMs));
+  res.json({ data: { email: admin.email } });
 }
