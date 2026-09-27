@@ -17,6 +17,19 @@ export const strongPassword = z
   .regex(/\d/, 'Password needs a number')
   .regex(/[^A-Za-z0-9]/, 'Password needs a symbol');
 
+export const forgotPasswordBody = z
+  .object({
+    email: z.string().trim().toLowerCase().max(254).email('Enter a valid email address'),
+  })
+  .strict();
+
+export const resetPasswordBody = z
+  .object({
+    token: z.string().regex(/^[a-f0-9]{64}$/, 'This reset link is invalid'),
+    newPassword: strongPassword,
+  })
+  .strict();
+
 export const changeEmailBody = z
   .object({
     currentPassword: z.string().min(1).max(200),

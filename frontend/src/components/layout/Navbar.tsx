@@ -55,7 +55,11 @@ export function Navbar({ name }: { name: string }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-bg">
       <nav aria-label="Primary" className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6 lg:px-10">
-        <Link href="/" className="text-[15px] font-semibold tracking-[-0.01em]">
+        {/* Same gold sweep as the "Get in touch" button. */}
+        <Link
+          href="/"
+          className="relative isolate -mx-2 overflow-hidden px-2 py-1 text-[15px] font-semibold tracking-[-0.01em] transition-colors duration-500 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-accent before:transition-transform before:duration-500 before:ease-[cubic-bezier(.22,1,.36,1)] before:content-[''] hover:text-accent-ink hover:before:scale-x-100 focus-visible:before:scale-x-100"
+        >
           {name}
         </Link>
 

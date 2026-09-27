@@ -7,6 +7,7 @@
  *   node scripts/set-vercel-secrets.mjs          set / rotate JWT_SECRET and INTERNAL_API_KEY
  *   node scripts/set-vercel-secrets.mjs --check  verify access with a harmless test variable
  *   node scripts/set-vercel-secrets.mjs --admin  set the first admin login (asked for, password hidden)
+ *   node scripts/set-vercel-secrets.mjs --email  connect Resend (reset emails + message notifications)
  *   node scripts/set-vercel-secrets.mjs --reset-login
  *                                                forgot the password? set a new one (and optionally a new email)
  *   node scripts/set-vercel-secrets.mjs --remove-admin-seed
@@ -221,6 +222,20 @@ async function resetLogin() {
   console.log('Done. After the redeploy, sign in with the new details. Then run with --remove-admin-seed.');
 }
 
+/** Connects Resend so the site can send password-reset links and new-message notifications. */
+async function setEmail() {
+  console.log('Connect email (Resend, https://resend.com). Create a free account and an API key first.');
+  const key = (await ask('Resend API key: ', { hidden: true })).trim();
+  if (!/^re_[A-Za-z0-9_]{10,}$/.test(key)) throw new Error('That does not look like a Resend API key (it starts with "re_"). Nothing was saved.');
+  const notify = (await ask('Email for new-message notifications (optional): ')).trim().toLowerCase();
+  if (notify && !EMAIL_PATTERN.test(notify)) throw new Error('That does not look like an email address. Nothing was saved.');
+  setVariable(API_PROJECT, 'RESEND_API_KEY', key);
+  if (notify) setVariable(API_PROJECT, 'ADMIN_NOTIFY_EMAIL', notify, 'plain');
+  redeployApi();
+  console.log('Done. Until you verify your own domain in Resend, emails can only be delivered to the address');
+  console.log('you signed up to Resend with, so use that same address as your admin login email.');
+}
+
 function removeAdminSeed() {
   const removed = deleteVariables(API_PROJECT, ['ADMIN_SEED_PASSWORD', 'ADMIN_RESET_PASSWORD']);
   console.log(removed.length ? `  ✓ removed: ${removed.join(', ')}` : 'No stored admin passwords were found.');
@@ -229,6 +244,8 @@ function removeAdminSeed() {
 try {
   if (process.argv.includes('--admin')) {
     await setAdminSeed();
+  } else if (process.argv.includes('--email')) {
+    await setEmail();
   } else if (process.argv.includes('--reset-login')) {
     await resetLogin();
   } else if (process.argv.includes('--remove-admin-seed')) {

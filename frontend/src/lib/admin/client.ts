@@ -60,6 +60,10 @@ export const authApi = {
   login: (email: string, password: string) =>
     request<{ admin: { email: string } }>('POST', '/login', { email, password }, '/api/v1/auth'),
   logout: (everywhere = false) => request<void>('POST', '/logout', { everywhere }, '/api/v1/auth'),
+  forgotPassword: (email: string) =>
+    request<{ requested: boolean; emailEnabled: boolean }>('POST', '/forgot-password', { email }, '/api/v1/auth'),
+  resetPassword: (token: string, newPassword: string) =>
+    request<{ reset: boolean }>('POST', '/reset-password', { token, newPassword }, '/api/v1/auth'),
   changeEmail: (currentPassword: string, newEmail: string) =>
     request<{ email: string }>('POST', '/change-email', { currentPassword, newEmail }, '/api/v1/auth'),
   changePassword: (currentPassword: string, newPassword: string) =>

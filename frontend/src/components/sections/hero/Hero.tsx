@@ -33,14 +33,17 @@ export function Hero({ settings, services }: { settings: SiteSettings; services:
 
         <h1
           id="hero-name"
-          className="mt-6 text-[clamp(3.25rem,11.5vw,9.5rem)] leading-[0.88] font-semibold tracking-[-0.055em]"
+          className="group mt-6 w-fit text-[clamp(3.25rem,11.5vw,9.5rem)] leading-[0.88] font-semibold tracking-[-0.055em]"
         >
           <span className="sr-only">{name}</span>
           {/* Each word rises from its own mask, one after another. */}
           {words.map((word, index) => (
             <span key={`${word}-${index}`} aria-hidden className="inline-block overflow-hidden pb-[0.08em] align-bottom">
               <span className="load-rise inline-block" style={delay(120 + index * 110)}>
-                {word}
+                {/* Gold sweeps through the name on hover, word after word (same motion as the buttons). */}
+                <span className="text-sweep" style={{ '--sweep-delay': `${index * 90}ms` } as React.CSSProperties}>
+                  {word}
+                </span>
                 {index < words.length - 1 && ' '}
               </span>
             </span>

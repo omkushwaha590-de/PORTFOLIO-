@@ -13,6 +13,9 @@ const adminSchema = new Schema(
     lastLoginAt: { type: Date, default: null },
     /** Id of the last login reset applied from ADMIN_RESET_* (see scripts/bootstrap.ts). */
     lastResetId: { type: String, default: null, select: false },
+    /** SHA-256 of the emailed password-reset token (the token itself is never stored). */
+    resetTokenHash: { type: String, default: null, select: false },
+    resetTokenExpires: { type: Date, default: null, select: false },
   },
   {
     timestamps: true,
@@ -26,6 +29,8 @@ const adminSchema = new Schema(
         delete ret.lockUntil;
         delete ret.tokenVersion;
         delete ret.lastResetId;
+        delete ret.resetTokenHash;
+        delete ret.resetTokenExpires;
         return ret;
       },
     },

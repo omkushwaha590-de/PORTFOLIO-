@@ -184,6 +184,24 @@ section[id] {
 
 /* --- Hover helpers --- */
 
+/*
+ * Gold sweep through text, the text version of the button fill: on hover of the parent `.group`,
+ * gold wipes across the letters from left to right. Used on the large hero name.
+ */
+@utility text-sweep {
+  background-image: linear-gradient(90deg, var(--accent) 0 50%, var(--fg) 50% 100%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-position 0.7s var(--ease-out);
+  transition-delay: var(--sweep-delay, 0ms);
+  :where(.group):hover & {
+    background-position: 0 0;
+  }
+}
+
 /* Underline that draws in from the left (use on inline text). */
 @utility link-draw {
   background-image: linear-gradient(currentColor, currentColor);

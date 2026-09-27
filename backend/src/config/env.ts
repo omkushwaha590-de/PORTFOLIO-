@@ -30,10 +30,14 @@ const envSchema = z
     LOGIN_LOCK_MINUTES: z.coerce.number().int().positive().default(15),
 
     RESEND_API_KEY: optionalString,
-    EMAIL_FROM: optionalString,
+    /** Resend's shared test sender works without a domain (it can only deliver to your Resend account's email). */
+    EMAIL_FROM: z.preprocess(emptyToUndefined, z.string().default('Portfolio <onboarding@resend.dev>')),
     ADMIN_NOTIFY_EMAIL: z.preprocess(emptyToUndefined, z.string().email().optional()),
 
     TURNSTILE_SECRET_KEY: optionalString,
+
+    /** Public website URL, used in links inside emails (defaults to the first CORS origin). */
+    SITE_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
 
     /** Shared secret between the frontend and this API (see middleware/client-ip.ts). */
     INTERNAL_API_KEY: z.preprocess(emptyToUndefined, z.string().min(32, 'INTERNAL_API_KEY must be at least 32 characters').optional()),

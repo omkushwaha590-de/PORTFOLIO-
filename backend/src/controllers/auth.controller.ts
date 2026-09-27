@@ -5,11 +5,14 @@ import {
   authenticate,
   changeEmail,
   changePassword,
+  requestPasswordReset,
+  resetPassword,
   revokeAllSessions,
   sessionCookieOptions,
   signSessionToken,
   verifySessionToken,
 } from '../services/auth.service';
+import { isEmailEnabled } from '../services/email.service';
 import { AppError } from '../utils/app-error';
 
 /** POST /auth/login — sets an httpOnly session cookie; the token is never exposed to JavaScript. */
@@ -59,4 +62,19 @@ export async function updateEmail(req: Request, res: Response) {
   const { token, maxAgeMs } = signSessionToken(String(admin._id), admin.tokenVersion);
   res.cookie(SESSION_COOKIE, token, sessionCookieOptions(maxAgeMs));
   res.json({ data: { email: admin.email } });
+}
+
+/** POST /auth/forgot-password — always the same answer, whether or not the email exists. */
+export async function forgotPassword(req: Request, res: Response) {
+  const { email } = req.body as { email: string };
+  await requestPasswordReset(email);
+  res.json({ data: { requested: true, emailEnabled: isEmailEnabled() } });
+}
+
+/** POST /auth/reset-password — completes a reset from the emailed link. */
+export async function completePasswordReset(req: Request, res: Response) {
+  const { token, newPassword } = req.body as { token: string; newPassword: string };
+  await resetPassword(token, newPassword);
+  res.clearCookie(SESSION_COOKIE, sessionCookieOptions());
+  res.json({ data: { reset: true } });
 }

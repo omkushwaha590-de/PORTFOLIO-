@@ -1,6 +1,6 @@
 /**
  * Local development without MongoDB Atlas: `npm run dev:local`
- * - runs a local MongoDB (data persisted in ./.dev-db)
+ * - runs a local MongoDB (data in %LOCALAPPDATA%/yogesh-portfolio/dev-db, outside synced folders)
  * - seeds the starter content on first run
  * - creates a development-only admin and writes its credentials to ./.dev-admin.txt (git-ignored)
  * Never use this in production.
@@ -8,6 +8,7 @@
 import { LOCAL_DB_PORT } from './dev-local.env'; // must stay the first import
 import { randomBytes } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createApp } from '../create-app';
@@ -19,7 +20,10 @@ import { hashPassword } from '../services/auth.service';
 import { seedContent } from './seed-content';
 
 async function main() {
-  const dbPath = path.resolve(process.cwd(), '.dev-db');
+  // Keep the database outside synced folders (OneDrive/Dropbox lock and rewrite the files while
+  // MongoDB has them open, which makes it exit). Override with DEV_DB_PATH if needed.
+  const dataRoot = process.env.LOCALAPPDATA ?? path.join(os.homedir(), '.local', 'share');
+  const dbPath = process.env.DEV_DB_PATH ?? path.join(dataRoot, 'yogesh-portfolio', 'dev-db');
   mkdirSync(dbPath, { recursive: true });
   const mongo = await MongoMemoryServer.create({ instance: { dbPath, storageEngine: 'wiredTiger', port: LOCAL_DB_PORT } });
 
