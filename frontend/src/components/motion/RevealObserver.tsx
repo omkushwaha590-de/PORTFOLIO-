@@ -21,8 +21,9 @@ export function RevealObserver() {
       frame = 0;
       const limit = window.innerHeight * 0.92;
       document.querySelectorAll(SELECTOR).forEach((element) => {
-        const rect = element.getBoundingClientRect();
-        if (rect.top < limit && rect.bottom > 0) element.classList.add('is-revealed');
+        // Anything in view or already scrolled past is revealed, so content above the viewport is never
+        // left hidden (e.g. after a fast scroll before scripts loaded, or when opening a /#section link).
+        if (element.getBoundingClientRect().top < limit) element.classList.add('is-revealed');
       });
     };
     const schedule = () => {
