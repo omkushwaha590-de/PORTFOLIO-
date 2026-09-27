@@ -6,6 +6,9 @@
  *
  *   node scripts/set-vercel-secrets.mjs          set / rotate JWT_SECRET and INTERNAL_API_KEY
  *   node scripts/set-vercel-secrets.mjs --check  verify access with a harmless test variable
+ *   node scripts/set-vercel-secrets.mjs --admin  set the first admin login (asked for, password hidden)
+ *   node scripts/set-vercel-secrets.mjs --remove-admin-seed
+ *                                                delete the stored admin password after first sign-in
  *
  * Requires the Vercel CLI to be logged in (`npx vercel login`). Rotating JWT_SECRET signs out
  * every admin session; redeploy both projects afterwards.
@@ -15,6 +18,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import readline from 'node:readline';
 
 const API_PROJECT = process.env.VERCEL_API_PROJECT ?? 'yogesh-portfolio-api';
 const WEB_PROJECT = process.env.VERCEL_WEB_PROJECT ?? 'yogesh-portfolio';
@@ -25,7 +29,7 @@ const workDir = mkdtempSync(path.join(tmpdir(), 'vercel-secrets-'));
 
 function vercelApi(method, endpoint, body) {
   const args = ['--yes', 'vercel', 'api', endpoint, '-X', method, '--raw'];
-  // The only DELETE this script makes is removing its own SETUP_CHECK test variable (--check mode).
+  // DELETE is only used for this script's own variables (SETUP_CHECK, ADMIN_SEED_PASSWORD).
   if (method === 'DELETE') args.push('--dangerously-skip-permissions');
   let file;
   if (body) {
@@ -69,8 +73,73 @@ function setVariable(project, key, value, type = 'sensitive') {
   console.log(`  ✓ ${project}: ${key}`);
 }
 
+/**
+ * Line-based prompt shared by all questions. Incoming lines are queued, so answers are never lost
+ * (even when input is pasted or piped). With `hidden`, typed characters are not echoed.
+ */
+let prompt;
+let muted = false;
+const lines = [];
+const waiting = [];
+function ask(question, { hidden = false } = {}) {
+  if (!prompt) {
+    prompt = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: Boolean(process.stdin.isTTY) });
+    const write = prompt._writeToOutput?.bind(prompt);
+    prompt._writeToOutput = (text) => {
+      if (!muted || text === '\r\n' || text === '\n') (write ?? ((t) => process.stdout.write(t)))(text);
+    };
+    prompt.on('line', (line) => (waiting.length ? waiting.shift()(line) : lines.push(line)));
+    prompt.on('close', () => waiting.splice(0).forEach((resolve) => resolve('')));
+  }
+  process.stdout.write(question);
+  muted = hidden;
+  return new Promise((resolve) => {
+    const done = (answer) => {
+      muted = false;
+      if (hidden) process.stdout.write('\n');
+      resolve(answer);
+    };
+    if (lines.length) done(lines.shift());
+    else waiting.push(done);
+  });
+}
+
+function passwordProblem(password) {
+  if (password.length < 12) return 'at least 12 characters';
+  if (!/[a-z]/.test(password)) return 'a lowercase letter';
+  if (!/[A-Z]/.test(password)) return 'an uppercase letter';
+  if (!/\d/.test(password)) return 'a number';
+  if (!/[^A-Za-z0-9]/.test(password)) return 'a symbol';
+  return null;
+}
+
+async function setAdminSeed() {
+  console.log('First admin login for the website dashboard (/admin).');
+  const email = (await ask('Admin email: ')).trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('That does not look like an email address.');
+  const password = await ask('Password (hidden): ', { hidden: true });
+  const problem = passwordProblem(password);
+  if (problem) throw new Error(`Password needs ${problem}. Nothing was saved.`);
+  const again = await ask('Repeat password (hidden): ', { hidden: true });
+  if (again !== password) throw new Error('Passwords do not match. Nothing was saved.');
+  setVariable(API_PROJECT, 'ADMIN_SEED_EMAIL', email, 'plain');
+  setVariable(API_PROJECT, 'ADMIN_SEED_PASSWORD', password);
+  console.log('Saved. The API creates this admin on its next deployment (only if no admin exists yet).');
+}
+
+function removeAdminSeed() {
+  const { envs = [] } = vercelApi('GET', `/v10/projects/${API_PROJECT}/env`);
+  const matches = envs.filter((item) => item.key === 'ADMIN_SEED_PASSWORD');
+  for (const env of matches) vercelApi('DELETE', `/v9/projects/${API_PROJECT}/env/${env.id}`);
+  console.log(matches.length ? '  ✓ ADMIN_SEED_PASSWORD removed' : 'ADMIN_SEED_PASSWORD was not set.');
+}
+
 try {
-  if (process.argv.includes('--check')) {
+  if (process.argv.includes('--admin')) {
+    await setAdminSeed();
+  } else if (process.argv.includes('--remove-admin-seed')) {
+    removeAdminSeed();
+  } else if (process.argv.includes('--check')) {
     console.log('Checking access to both projects...');
     for (const project of [API_PROJECT, WEB_PROJECT]) {
       setVariable(project, 'SETUP_CHECK', 'ok', 'plain');
@@ -93,5 +162,6 @@ try {
   console.error(`✗ ${error.message}`);
   process.exitCode = 1;
 } finally {
+  prompt?.close();
   rmSync(workDir, { recursive: true, force: true });
 }

@@ -57,21 +57,29 @@ cookie stays on your own domain. Everything is managed from Vercel:
 
 > After the Website has its final URL, make sure it is listed in the API's `CORS_ORIGINS` and redeploy the API.
 
-## 3. Load the content and create the admin (once)
+## 3. Content and the first admin login (automatic)
 
-Run these from your computer against the production database (the connection string is in the API
-project's **Settings → Environment Variables → MONGODB_URI**):
+On its first start against an empty database the API loads the starter profile content by itself
+(`backend/src/scripts/bootstrap.ts`). It never does this again once a profile exists, so anything you
+delete in the admin stays deleted.
+
+To create the first admin login, run this from the project folder and answer the questions (the
+password is hidden while you type):
 
 ```bash
-cd backend
-# create backend/.env with MONGODB_URI (production), JWT_SECRET, NODE_ENV=development,
-# ADMIN_SEED_EMAIL, ADMIN_SEED_NAME and ADMIN_SEED_PASSWORD (12+ chars, upper/lower/number/symbol)
-npm run seed:content     # profile, projects, expertise, skills, experience
-npm run seed:admin       # creates your admin login
+node scripts/set-vercel-secrets.mjs --admin
 ```
 
-Then delete `ADMIN_SEED_PASSWORD` from `backend/.env` (the file is git-ignored and never uploaded).
-Sign in at `https://<website>/admin`.
+Then redeploy the API (Vercel → API project → Deployments → ⋯ → Redeploy). The admin is created on the
+next start, only if no admin exists yet. After you have signed in at `https://<website>/admin`, remove the
+stored password:
+
+```bash
+node scripts/set-vercel-secrets.mjs --remove-admin-seed
+```
+
+The two server secrets (`JWT_SECRET`, `INTERNAL_API_KEY`) are set with
+`node scripts/set-vercel-secrets.mjs` (run again any time to rotate them, then redeploy both projects).
 
 ## 4. Custom domain
 
