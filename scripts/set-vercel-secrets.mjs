@@ -36,11 +36,12 @@ function vercelApi(method, endpoint, body) {
   const result = spawnSync('npx', args, {
     encoding: 'utf8',
     shell: process.platform === 'win32',
-    env: { ...process.env, MSYS_NO_PATHCONV: '1' },
+    env: { ...process.env, MSYS_NO_PATHCONV: '1', VERCEL_TELEMETRY_DISABLED: '1' },
   });
   if (file) rmSync(file, { force: true }); // never leave a secret on disk
   const output = `${result.stdout ?? ''}${result.stderr ?? ''}`;
-  // The CLI may print banners or hints around the JSON body; parse only the outermost object.
+
+  // The CLI may print banners, notices or hints around the JSON body; parse only the outermost object.
   const start = output.indexOf('{');
   const end = output.lastIndexOf('}');
   let json = null;
@@ -49,8 +50,15 @@ function vercelApi(method, endpoint, body) {
   } catch {
     // not JSON
   }
+
   if (result.status !== 0 || !json || json.error) {
-    const message = json?.error?.message ?? output.replace(/\s+/g, ' ').slice(0, 200);
+    // Drop CLI notices ("> NOTE: ...") and hints so the actual error is shown.
+    const details = output
+      .split(/\r?\n/)
+      .filter((line) => line.trim() && !line.startsWith('>') && !line.includes('claude-code-hint'))
+      .join(' ')
+      .slice(0, 400);
+    const message = json?.error?.message ?? `exit code ${result.status}: ${details}`;
     throw new Error(`${method} ${endpoint} failed: ${message}`);
   }
   return json;
@@ -63,7 +71,7 @@ function setVariable(project, key, value, type = 'sensitive') {
 
 try {
   if (process.argv.includes('--check')) {
-    console.log('Checking access to both projects…');
+    console.log('Checking access to both projects...');
     for (const project of [API_PROJECT, WEB_PROJECT]) {
       setVariable(project, 'SETUP_CHECK', 'ok', 'plain');
       const { envs = [] } = vercelApi('GET', `/v10/projects/${project}/env`);
@@ -75,7 +83,7 @@ try {
     console.log('Access OK. Run again without --check to set the real secrets.');
   } else {
     const internalKey = secret(); // shared by both projects
-    console.log('Setting secrets (values are not shown)…');
+    console.log('Setting secrets (values are not shown)...');
     setVariable(API_PROJECT, 'JWT_SECRET', secret());
     setVariable(API_PROJECT, 'INTERNAL_API_KEY', internalKey);
     setVariable(WEB_PROJECT, 'INTERNAL_API_KEY', internalKey);
