@@ -1,5 +1,5 @@
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import { pad } from '@/lib/utils';
 import type { Service } from '@/types/api';
 
@@ -22,11 +22,21 @@ export function Expertise({ services }: { services: Service[] }) {
           {services.map((service, index) => (
             <li
               key={service.id}
-              className="grid gap-4 border-t border-line py-8 transition-colors hover:bg-surface lg:grid-cols-12 lg:gap-8 lg:px-0"
+              data-reveal="rise"
+              style={delay((index % 3) * 90)}
+              className="group relative grid gap-4 border-t border-line py-8 transition-colors duration-500 hover:bg-surface lg:grid-cols-12 lg:gap-8 lg:px-0"
             >
-              <p className="font-mono text-xs text-subtle lg:col-span-1">{pad(index)}</p>
+              <span
+                aria-hidden
+                className="absolute top-0 bottom-0 left-0 w-0.5 origin-top scale-y-0 bg-accent transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-y-100"
+              />
+              <p className="font-mono text-xs text-subtle transition-colors duration-300 group-hover:text-accent lg:col-span-1 lg:pl-3">
+                {pad(index)}
+              </p>
               <div className="lg:col-span-4">
-                <h3 className="text-xl font-semibold tracking-[-0.015em] sm:text-2xl">{service.title}</h3>
+                <h3 className="text-xl font-semibold tracking-[-0.015em] transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-2 sm:text-2xl">
+                  {service.title}
+                </h3>
               </div>
               <div className="lg:col-span-4">
                 <p className="leading-relaxed text-muted text-pretty">{service.description || service.shortDescription}</p>

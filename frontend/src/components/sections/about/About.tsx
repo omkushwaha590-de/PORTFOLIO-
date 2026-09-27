@@ -1,5 +1,5 @@
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import { paragraphs } from '@/lib/utils';
 import type { Experience, SiteSettings, Skill } from '@/types/api';
 
@@ -43,16 +43,27 @@ export function About({ settings, experience, skills }: AboutProps) {
 
           <div className="space-y-5 text-base leading-relaxed text-muted text-pretty sm:text-lg lg:col-span-5">
             {rest.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+              <p key={index} data-reveal="rise" style={delay(index * 110)}>
+                {paragraph}
+              </p>
             ))}
           </div>
 
           {facts.length > 0 && (
             <dl className="lg:col-span-4">
-              {facts.map((fact) => (
-                <div key={fact.label} className="border-t border-line py-4 first:border-t-fg">
-                  <dt className="font-mono text-[11px] text-subtle uppercase">{fact.label}</dt>
-                  <dd className="mt-1.5 text-sm leading-relaxed text-fg">{fact.value}</dd>
+              {facts.map((fact, index) => (
+                <div
+                  key={fact.label}
+                  data-reveal="rise"
+                  style={delay(120 + index * 90)}
+                  className="group border-t border-line py-4 first:border-t-fg"
+                >
+                  <dt className="font-mono text-[11px] text-subtle uppercase transition-colors duration-300 group-hover:text-accent">
+                    {fact.label}
+                  </dt>
+                  <dd className="mt-1.5 text-sm leading-relaxed text-fg transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-1">
+                    {fact.value}
+                  </dd>
                 </div>
               ))}
             </dl>

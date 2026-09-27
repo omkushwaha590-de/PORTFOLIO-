@@ -93,3 +93,107 @@ section[id] {
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* ==========================================================================
+   Motion — small, editorial transitions. Mask reveals and drawn lines rather than fades.
+   Everything is disabled for visitors who prefer reduced motion.
+   ========================================================================== */
+
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* --- Scroll reveals (JS adds .is-revealed when the element enters the viewport) --- */
+  @media (scripting: enabled) {
+    [data-reveal] {
+      transition:
+        clip-path 0.95s var(--ease-out),
+        transform 0.95s var(--ease-out);
+      transition-delay: var(--d, 0ms);
+    }
+    /* Text and blocks rise out of an invisible bottom edge. */
+    [data-reveal='rise']:not(.is-revealed) {
+      clip-path: inset(0 0 100% 0);
+      transform: translateY(28px);
+    }
+    /* Rules draw from left to right. */
+    [data-reveal='line'] {
+      transform-origin: left center;
+    }
+    [data-reveal='line']:not(.is-revealed) {
+      transform: scaleX(0);
+    }
+    /* Images wipe upwards. */
+    [data-reveal='image']:not(.is-revealed) {
+      clip-path: inset(100% 0 0 0);
+    }
+    [data-reveal].is-revealed {
+      clip-path: inset(-10% -10% -10% -10%);
+      transform: none;
+    }
+  }
+
+  /* --- Page-load sequence (pure CSS, no JS needed) --- */
+  .load-rise {
+    animation: load-rise 1s var(--ease-out) both;
+    animation-delay: var(--d, 0ms);
+  }
+  .load-line {
+    transform-origin: left center;
+    animation: load-line 1.2s var(--ease-out) both;
+    animation-delay: var(--d, 0ms);
+  }
+  .load-wipe {
+    animation: load-wipe 1.3s var(--ease-out) both;
+    animation-delay: var(--d, 0ms);
+  }
+}
+
+@keyframes load-rise {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes load-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes load-wipe {
+  from {
+    clip-path: inset(100% -10% 0 -10%);
+  }
+  to {
+    /* Ends slightly outside the box so the 3D tilt afterwards is never clipped. */
+    clip-path: inset(-10% -10% -10% -10%);
+  }
+}
+
+/* --- Hover helpers --- */
+
+/* Underline that draws in from the left (use on inline text). */
+@utility link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 0.45s var(--ease-out);
+  &:hover,
+  &:focus-visible,
+  :where(.group):hover & {
+    background-size: 100% 1px;
+  }
+}

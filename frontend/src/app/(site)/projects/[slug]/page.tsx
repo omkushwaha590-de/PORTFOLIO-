@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps<'/projects/[slug]'>
 /** One row of the case study: label in the left column, content in the right. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <section className="grid gap-4 border-t border-line py-10 lg:grid-cols-12 lg:gap-8">
+    <section data-reveal="rise" className="grid gap-4 border-t border-line py-10 lg:grid-cols-12 lg:gap-8">
       <h2 className="text-sm font-semibold lg:col-span-3">{label}</h2>
       <div className="lg:col-span-9">{children}</div>
     </section>
@@ -58,18 +58,22 @@ export default async function ProjectPage({ params }: PageProps<'/projects/[slug
   return (
     <article className="pt-14 pb-12 sm:pt-20">
       <Container>
-        <Link href="/projects" className="font-mono text-xs text-muted hover:text-fg">
-          ← All projects
+        <Link href="/projects" className="group font-mono text-xs text-muted transition-colors hover:text-fg">
+          <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">←</span> All projects
         </Link>
 
         <header className="mt-8">
-          <h1 className="max-w-5xl text-[clamp(2.25rem,6vw,4.75rem)] leading-[0.98] font-semibold tracking-[-0.045em] text-balance">
-            {project.title}
+          <h1 className="max-w-5xl overflow-hidden pb-[0.06em] text-[clamp(2.25rem,6vw,4.75rem)] leading-[0.98] font-semibold tracking-[-0.045em] text-balance">
+            <span className="load-rise block">{project.title}</span>
           </h1>
-          <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted text-pretty">{project.shortDescription}</p>
+          <p className="mt-8 max-w-2xl overflow-hidden text-lg leading-relaxed text-muted text-pretty">
+            <span className="load-rise block" style={{ '--d': '150ms' } as React.CSSProperties}>
+              {project.shortDescription}
+            </span>
+          </p>
 
           {meta.length > 0 && (
-            <dl className="mt-12 grid grid-cols-2 gap-x-8 lg:grid-cols-4">
+            <dl data-reveal="rise" className="mt-12 grid grid-cols-2 gap-x-8 lg:grid-cols-4">
               {meta.map((item) => (
                 <div key={item.label} className="border-t border-fg py-4">
                   <dt className="font-mono text-[11px] text-subtle uppercase">{item.label}</dt>

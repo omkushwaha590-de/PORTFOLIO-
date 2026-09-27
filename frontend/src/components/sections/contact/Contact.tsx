@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ContactForm } from '@/components/forms/ContactForm';
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { SiteSettings } from '@/types/api';
 
 export function Contact({ settings }: { settings: SiteSettings }) {
@@ -11,7 +11,7 @@ export function Contact({ settings }: { settings: SiteSettings }) {
         <SectionHeading index="08" label="Contact" id="contact-title" title="Let’s talk about your quality or operations challenge." />
 
         <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-8">
-          <div className="space-y-8 lg:col-span-3">
+          <div data-reveal="rise" className="space-y-8 lg:col-span-3">
             <p className="text-sm leading-relaxed text-muted">
               Quality systems, supplier development, audits, Six Sigma, strategy or an industry collaboration. Send a
               note and I will reply personally.
@@ -39,7 +39,7 @@ export function Contact({ settings }: { settings: SiteSettings }) {
             </Link>
           </div>
 
-          <div className="lg:col-span-9">
+          <div data-reveal="rise" style={delay(120)} className="lg:col-span-9">
             <ContactForm inquiryTypes={settings.projectTypes} />
           </div>
         </div>

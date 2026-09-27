@@ -1,7 +1,7 @@
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ButtonLink } from '@/components/ui/Button';
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { ProjectCard as ProjectCardType } from '@/types/api';
 
 export function SelectedWork({ projects, total }: { projects: ProjectCardType[]; total: number }) {
@@ -27,7 +27,7 @@ export function SelectedWork({ projects, total }: { projects: ProjectCardType[];
 
         <ul className="mt-14 grid gap-x-8 gap-y-12 md:grid-cols-2">
           {projects.map((project, index) => (
-            <li key={project.id}>
+            <li key={project.id} data-reveal="rise" style={delay((index % 2) * 120)}>
               <ProjectCard project={project} index={index} />
             </li>
           ))}

@@ -44,7 +44,7 @@ export function FilterableProjects({ projects, categories, initialCategory }: Pr
               aria-pressed={selected}
               onClick={() => select(category)}
               className={cn(
-                'border-r border-b border-line px-4 py-3 text-sm transition-colors',
+                'border-r border-b border-line px-4 py-3 text-sm transition-colors duration-300',
                 selected ? 'bg-fg text-bg' : 'text-muted hover:bg-surface hover:text-fg',
               )}
             >
@@ -60,7 +60,7 @@ export function FilterableProjects({ projects, categories, initialCategory }: Pr
 
       <ul className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-2">
         {visible.map((project, index) => (
-          <li key={project.id}>
+          <li key={project.id} data-reveal="rise" style={{ '--d': `${(index % 2) * 120}ms` } as React.CSSProperties}>
             <ProjectCard project={project} index={index} priority={index < 2} />
           </li>
         ))}

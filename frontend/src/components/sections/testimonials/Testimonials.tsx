@@ -1,5 +1,5 @@
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { Testimonial } from '@/types/api';
 
 /** Shown only when real, published testimonials exist. Nothing is ever shown as a placeholder. */
@@ -11,8 +11,8 @@ export function Testimonials({ testimonials }: { testimonials: Testimonial[] }) 
       <Container>
         <SectionHeading index="07" label="References" id="testimonials-title" title="What colleagues say." />
         <ul className="mt-14 grid gap-x-8 md:grid-cols-2">
-          {testimonials.map((item) => (
-            <li key={item.id} className="border-t border-line py-8">
+          {testimonials.map((item, index) => (
+            <li key={item.id} data-reveal="rise" style={delay((index % 2) * 120)} className="border-t border-line py-8">
               <figure>
                 <blockquote className="text-lg leading-relaxed text-fg text-pretty sm:text-xl">“{item.testimonial}”</blockquote>
                 <figcaption className="mt-6 text-sm">

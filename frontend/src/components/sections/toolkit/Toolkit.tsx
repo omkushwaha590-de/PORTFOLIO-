@@ -1,5 +1,5 @@
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { Skill } from '@/types/api';
 
 export function Toolkit({ skills }: { skills: Skill[] }) {
@@ -19,13 +19,15 @@ export function Toolkit({ skills }: { skills: Skill[] }) {
         <SectionHeading index="05" label="Toolkit" id="toolkit-title" title="Methods, standards and tools." />
 
         <dl className="mt-14 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
-          {groups.map(([category, items]) => (
-            <div key={category} className="border-t border-fg py-5">
+          {groups.map(([category, items], groupIndex) => (
+            <div key={category} data-reveal="rise" style={delay(groupIndex * 100)} className="border-t border-fg py-5">
               <dt className="text-sm font-semibold">{category}</dt>
               <dd className="mt-4">
                 <ul className="space-y-1.5 text-sm text-muted">
                   {items.map((item) => (
-                    <li key={item}>{item}</li>
+                    <li key={item} className="w-fit transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:translate-x-1 hover:text-fg">
+                      {item}
+                    </li>
                   ))}
                 </ul>
               </dd>

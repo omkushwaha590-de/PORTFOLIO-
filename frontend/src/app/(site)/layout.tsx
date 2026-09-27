@@ -2,6 +2,7 @@ import { connection } from 'next/server';
 import { CustomCursor } from '@/components/layout/CustomCursor';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
+import { RevealObserver } from '@/components/motion/RevealObserver';
 import { getSettings } from '@/lib/api/server';
 
 export default async function SiteLayout({ children }: LayoutProps<'/'>) {
@@ -24,6 +25,7 @@ export default async function SiteLayout({ children }: LayoutProps<'/'>) {
       </main>
       <Footer settings={settings} />
       <CustomCursor />
+      <RevealObserver />
     </>
   );
 }

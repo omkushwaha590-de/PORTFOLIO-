@@ -12,8 +12,8 @@ coverage/
 !.env.example
 
 # Local development data
-backend/.dev-db/
-backend/.dev-admin.txt
+backend/.dev-db*/
+backend/.dev-admin*.txt
 backend/uploads/
 
 # Vercel & OS files

@@ -4,7 +4,9 @@ import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { ScrollProgress } from '@/components/motion/ScrollProgress';
 import { ButtonLink } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 import { NAV_LINKS } from './nav-links';
 
 export function Navbar({ name }: { name: string }) {
@@ -18,6 +20,24 @@ export function Navbar({ name }: { name: string }) {
     setLastPathname(pathname);
     setOpen(false);
   }
+
+  // Highlight the home-page section currently being read.
+  const [activeSection, setActiveSection] = useState('');
+  useEffect(() => {
+    if (pathname !== '/') return;
+    const sections = NAV_LINKS.map((link) => document.getElementById(link.href.split('#')[1]!)).filter(
+      (section): section is HTMLElement => Boolean(section),
+    );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) if (entry.isIntersecting) setActiveSection(entry.target.id);
+      },
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [pathname]);
+  const isActive = (href: string) => pathname === '/' && href.endsWith(`#${activeSection}`);
 
   // Escape closes the menu and returns focus to the toggle.
   useEffect(() => {
@@ -42,7 +62,15 @@ export function Navbar({ name }: { name: string }) {
         <ul className="hidden items-center gap-8 lg:flex">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <Link href={link.href} className="text-sm text-muted transition-colors hover:text-fg">
+              <Link
+                href={link.href}
+                aria-current={isActive(link.href) ? 'true' : undefined}
+                className={cn(
+                  'relative py-1 text-sm transition-colors duration-300 hover:text-fg',
+                  "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:bg-accent after:transition-transform after:duration-500 after:content-['']",
+                  isActive(link.href) ? 'text-fg after:scale-x-100' : 'text-muted after:scale-x-0 hover:after:scale-x-100',
+                )}
+              >
                 {link.label}
               </Link>
             </li>
@@ -69,6 +97,7 @@ export function Navbar({ name }: { name: string }) {
           </button>
         </div>
       </nav>
+      <ScrollProgress />
 
       {open && (
         <div id="mobile-menu" className="border-t border-line bg-bg lg:hidden">

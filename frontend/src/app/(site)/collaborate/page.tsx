@@ -20,13 +20,17 @@ export default async function CollaboratePage() {
   return (
     <section className="pt-14 pb-12 sm:pt-20">
       <Container>
-        <p className="font-mono text-xs text-muted">Get in touch</p>
-        <h1 className="mt-6 max-w-4xl text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-balance">
-          Tell me about the challenge.
+        <span className="block overflow-hidden">
+          <span className="load-rise block font-mono text-xs text-muted">Get in touch</span>
+        </span>
+        <h1 className="mt-6 max-w-4xl overflow-hidden pb-[0.06em] text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-balance">
+          <span className="load-rise block" style={{ '--d': '120ms' } as React.CSSProperties}>
+            Tell me about the challenge.
+          </span>
         </h1>
 
         <div className="mt-16 grid gap-12 border-t border-line pt-8 lg:grid-cols-12 lg:gap-8">
-          <aside className="space-y-10 lg:col-span-3">
+          <aside data-reveal="rise" className="space-y-10 lg:col-span-3">
             <p className="text-sm leading-relaxed text-muted">
               Advisory, training, audits, strategy or an industry collaboration. The more context you share, the more
               useful my reply will be.
@@ -52,7 +56,7 @@ export default async function CollaboratePage() {
             )}
           </aside>
 
-          <div className="lg:col-span-9">
+          <div data-reveal="rise" style={{ '--d': '120ms' } as React.CSSProperties} className="lg:col-span-9">
             <CollaborateForm
               options={{
                 projectTypes: settings.projectTypes,

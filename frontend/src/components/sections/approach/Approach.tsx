@@ -1,5 +1,5 @@
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import { STEPS } from './steps';
 
 /** DMAIC + Sustain as a static, scannable grid — no scroll-driven effects. */
@@ -17,10 +17,12 @@ export function Approach() {
 
         <ol className="mt-14 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
           {STEPS.map((step, index) => (
-            <li key={step.name} className="border-t border-line py-7">
+            <li key={step.name} data-reveal="rise" style={delay((index % 3) * 100)} className="group border-t border-line py-7">
               <p className="flex items-baseline gap-3">
                 <span className="font-mono text-xs text-accent">{String(index + 1).padStart(2, '0')}</span>
-                <span className="text-2xl font-semibold tracking-[-0.02em]">{step.name}</span>
+                <span className="text-2xl font-semibold tracking-[-0.02em] transition-colors duration-300 group-hover:text-accent">
+                  {step.name}
+                </span>
               </p>
               <h3 className="mt-4 font-medium text-fg">{step.lead}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted text-pretty">{step.body}</p>

@@ -5,8 +5,8 @@ uploads/
 *.log
 
 # Local development database and generated dev credentials
-.dev-db/
-.dev-admin.txt
+.dev-db*/
+.dev-admin*.txt
 
 # Secrets — never commit
 .env

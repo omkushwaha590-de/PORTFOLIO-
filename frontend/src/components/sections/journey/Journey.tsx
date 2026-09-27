@@ -1,5 +1,5 @@
 import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
+import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { Experience, ExperienceKind } from '@/types/api';
 
 function period(entry: Experience): string {
@@ -27,7 +27,7 @@ export function Journey({ experience }: { experience: Experience[] }) {
         {roles.length > 0 && (
           <ol className="mt-14">
             {roles.map((role) => (
-              <li key={role.id} className="grid gap-4 border-t border-line py-10 lg:grid-cols-12 lg:gap-8">
+              <li key={role.id} data-reveal="rise" className="grid gap-4 border-t border-line py-10 lg:grid-cols-12 lg:gap-8">
                 <div className="lg:col-span-3">
                   <p className="tabular font-mono text-xs text-fg">{period(role)}</p>
                   {role.location && <p className="mt-1 font-mono text-xs text-subtle">{role.location}</p>}
@@ -53,15 +53,18 @@ export function Journey({ experience }: { experience: Experience[] }) {
         )}
 
         <div className="mt-10 grid gap-x-8 md:grid-cols-2">
-          {GROUPS.map(({ kind, title }) => {
+          {GROUPS.map(({ kind, title }, groupIndex) => {
             const entries = experience.filter((entry) => entry.kind === kind);
             if (entries.length === 0) return null;
             return (
-              <div key={kind} className="border-t border-fg pt-5 pb-10">
+              <div key={kind} data-reveal="rise" style={delay((groupIndex % 2) * 120)} className="border-t border-fg pt-5 pb-10">
                 <h3 className="text-sm font-semibold">{title}</h3>
                 <ul className="mt-4">
                   {entries.map((entry) => (
-                    <li key={entry.id} className="flex items-start justify-between gap-6 border-t border-line py-4">
+                    <li
+                      key={entry.id}
+                      className="flex items-start justify-between gap-6 border-t border-line py-4 transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:translate-x-1"
+                    >
                       <div>
                         <p className="text-fg">{entry.title}</p>
                         {(entry.organization || entry.location) && (
