@@ -76,34 +76,82 @@ function setVariable(project, key, value, type = 'sensitive') {
 }
 
 /**
- * Line-based prompt shared by all questions. Incoming lines are queued, so answers are never lost
- * (even when input is pasted or piped). With `hidden`, typed characters are not echoed.
+ * Terminal questions. In a real terminal each answer is read directly; passwords show one * per
+ * character (Backspace works, Ctrl+C cancels). When input is piped, lines are queued instead so no
+ * answer is lost.
  */
-let prompt;
-let muted = false;
-const lines = [];
-const waiting = [];
-function ask(question, { hidden = false } = {}) {
-  if (!prompt) {
-    prompt = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: Boolean(process.stdin.isTTY) });
-    const write = prompt._writeToOutput?.bind(prompt);
-    prompt._writeToOutput = (text) => {
-      if (!muted || text === '\r\n' || text === '\n') (write ?? ((t) => process.stdout.write(t)))(text);
-    };
-    prompt.on('line', (line) => (waiting.length ? waiting.shift()(line) : lines.push(line)));
-    prompt.on('close', () => waiting.splice(0).forEach((resolve) => resolve('')));
+let pipedPrompt;
+const pipedLines = [];
+const pipedWaiting = [];
+
+function askPiped(question, hidden) {
+  if (!pipedPrompt) {
+    pipedPrompt = readline.createInterface({ input: process.stdin, terminal: false });
+    pipedPrompt.on('line', (line) => (pipedWaiting.length ? pipedWaiting.shift()(line) : pipedLines.push(line)));
+    pipedPrompt.on('close', () => pipedWaiting.splice(0).forEach((resolve) => resolve('')));
   }
   process.stdout.write(question);
-  muted = hidden;
   return new Promise((resolve) => {
     const done = (answer) => {
-      muted = false;
-      if (hidden) process.stdout.write('\n');
+      process.stdout.write(hidden ? '\n' : `${answer}\n`);
       resolve(answer);
     };
-    if (lines.length) done(lines.shift());
-    else waiting.push(done);
+    if (pipedLines.length) done(pipedLines.shift());
+    else pipedWaiting.push(done);
   });
+}
+
+function askVisible(question) {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
+}
+
+function askMasked(question) {
+  return new Promise((resolve) => {
+    const input = process.stdin;
+    let value = '';
+    process.stdout.write(question);
+    input.setRawMode(true);
+    input.resume();
+    input.setEncoding('utf8');
+    const finish = () => {
+      input.setRawMode(false);
+      input.pause();
+      input.removeListener('data', onData);
+      process.stdout.write('\n');
+      resolve(value);
+    };
+    const onData = (chunk) => {
+      for (const char of chunk) {
+        if (char === '\r' || char === '\n') return finish();
+        if (char === '\u0003') {
+          input.setRawMode(false);
+          process.stdout.write('\nCancelled. Nothing was saved.\n');
+          process.exit(130);
+        }
+        if (char === '\u007f' || char === '\b') {
+          if (value.length) {
+            value = value.slice(0, -1);
+            process.stdout.write('\b \b');
+          }
+        } else if (char >= ' ') {
+          value += char;
+          process.stdout.write('*');
+        }
+      }
+    };
+    input.on('data', onData);
+  });
+}
+
+function ask(question, { hidden = false } = {}) {
+  if (!process.stdin.isTTY) return askPiped(question, hidden);
+  return hidden ? askMasked(question) : askVisible(question);
 }
 
 function passwordProblem(password) {
@@ -116,10 +164,10 @@ function passwordProblem(password) {
 }
 
 async function askNewPassword() {
-  const password = await ask('Password (hidden): ', { hidden: true });
+  const password = await ask('Password: ', { hidden: true });
   const problem = passwordProblem(password);
   if (problem) throw new Error(`Password needs ${problem}. Nothing was saved.`);
-  const again = await ask('Repeat password (hidden): ', { hidden: true });
+  const again = await ask('Repeat password: ', { hidden: true });
   if (again !== password) throw new Error('Passwords do not match. Nothing was saved.');
   return password;
 }
@@ -205,6 +253,6 @@ try {
   console.error(`✗ ${error.message}`);
   process.exitCode = 1;
 } finally {
-  prompt?.close();
+  pipedPrompt?.close();
   rmSync(workDir, { recursive: true, force: true });
 }
