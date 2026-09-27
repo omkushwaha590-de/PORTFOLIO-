@@ -39,7 +39,10 @@ function vercelApi(method, endpoint, body) {
     writeFileSync(file, JSON.stringify(body), { mode: 0o600 });
     args.push('--input', file);
   }
-  const result = spawnSync('npx', args, {
+  // On Windows the command runs through cmd.exe, where characters such as & in the API query string
+  // would split the command; quote every argument so it is passed through unchanged.
+  const shellArgs = process.platform === 'win32' ? args.map((arg) => `"${arg.replace(/"/g, '""')}"`) : args;
+  const result = spawnSync('npx', shellArgs, {
     encoding: 'utf8',
     shell: process.platform === 'win32',
     env: { ...process.env, MSYS_NO_PATHCONV: '1', VERCEL_TELEMETRY_DISABLED: '1' },
