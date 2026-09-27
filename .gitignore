@@ -1,0 +1,26 @@
+# Dependencies & build output
+node_modules/
+.next/
+dist/
+out/
+coverage/
+*.tsbuildinfo
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Local development data
+backend/.dev-db/
+backend/.dev-admin.txt
+backend/uploads/
+
+# Vercel & OS files
+.vercel/
+.DS_Store
+Thumbs.db
+*.log
+
+# Personal Claude Code settings
+.claude/settings.local.json

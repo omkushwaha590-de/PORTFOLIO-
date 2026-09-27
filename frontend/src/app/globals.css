@@ -1,0 +1,95 @@
+@import 'tailwindcss';
+
+/*
+ * Design language: Swiss editorial, dark and flat.
+ * One typeface family, strict grid, hairline rules, square corners, a single restrained accent.
+ * No gradients, glows, blur or entrance animations.
+ */
+:root {
+  /* Ocean palette: deep navy base, layered blue tones, warm gold accent. */
+  --bg: #0b1829;
+  --bg-alt: #0f2136;
+  --bg-deep: #081220;
+  --surface: #132a44;
+  --surface-2: #19355a;
+  --line: #22405f;
+  --line-strong: #34597f;
+  --fg: #eef3f8;
+  --muted: #a8bccf;
+  --subtle: #7892ab;
+  --accent: #e4b565;
+  --accent-ink: #1a1204;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-alt: var(--bg-alt);
+  --color-bg-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* Square corners by default */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+}
+
+html {
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01', 'cv11';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Custom cursor (mouse only): hide the system pointer except where people type. */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none;
+}
+html.has-custom-cursor :is(input, textarea, [contenteditable='true']) {
+  cursor: text;
+}
+
+section[id] {
+  scroll-margin-top: 72px;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility text-pretty {
+  text-wrap: pretty;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
