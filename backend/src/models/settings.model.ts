@@ -9,6 +9,9 @@ const linkSchema = new Schema(
   { _id: false },
 );
 
+/** Icons an admin can pick for a home-page figure ('' = choose automatically from the label). */
+export const STAT_ICONS = ['calendar', 'target', 'shield', 'globe', 'award', 'factory', 'users', 'chart', 'leaf', 'briefcase'] as const;
+
 /**
  * Single-document collection holding site-wide, admin-editable configuration.
  * Form option lists live here so business decisions are not hardcoded in the UI.
@@ -33,7 +36,7 @@ const settingsSchema = new Schema(
       photoAlt: { type: String, trim: true, default: '' },
     },
     /** Headline numbers shown on the home page, e.g. { value: "16+", label: "Years of experience" }. */
-    stats: { type: [new Schema({ value: String, label: String }, { _id: false })], default: [] },
+    stats: { type: [new Schema({ value: String, label: String, icon: { type: String, default: '' } }, { _id: false })], default: [] },
 
     contactEmail: { type: String, trim: true, default: '' },
     location: { type: String, trim: true, default: '' },

@@ -3,13 +3,15 @@
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollProgress } from '@/components/motion/ScrollProgress';
 import { ButtonLink } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { NAV_LINKS } from './nav-links';
 
-export function Navbar({ name }: { name: string }) {
+export function Navbar({ name, hiddenLinks = [] }: { name: string; hiddenLinks?: string[] }) {
+  const hiddenKey = hiddenLinks.join(',');
+  const links = useMemo(() => NAV_LINKS.filter((link) => !hiddenKey.split(',').includes(link.href)), [hiddenKey]);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -25,7 +27,7 @@ export function Navbar({ name }: { name: string }) {
   const [activeSection, setActiveSection] = useState('');
   useEffect(() => {
     if (pathname !== '/') return;
-    const sections = NAV_LINKS.map((link) => document.getElementById(link.href.split('#')[1]!)).filter(
+    const sections = links.map((link) => document.getElementById(link.href.split('#')[1]!)).filter(
       (section): section is HTMLElement => Boolean(section),
     );
     const observer = new IntersectionObserver(
@@ -36,7 +38,7 @@ export function Navbar({ name }: { name: string }) {
     );
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
-  }, [pathname]);
+  }, [pathname, links]);
   const isActive = (href: string) => pathname === '/' && href.endsWith(`#${activeSection}`);
 
   // Escape closes the menu and returns focus to the toggle.
@@ -64,7 +66,7 @@ export function Navbar({ name }: { name: string }) {
         </Link>
 
         <ul className="hidden items-center gap-8 lg:flex">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
@@ -106,7 +108,7 @@ export function Navbar({ name }: { name: string }) {
       {open && (
         <div id="mobile-menu" className="border-t border-line bg-bg lg:hidden">
           <ul className="mx-auto max-w-[1200px] px-4 sm:px-6">
-            {NAV_LINKS.map((link, index) => (
+            {links.map((link, index) => (
               <li key={link.href} className="border-b border-line">
                 <Link
                   href={link.href}

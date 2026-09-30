@@ -78,8 +78,22 @@ html.has-custom-cursor :is(input, textarea, [contenteditable='true']) {
   cursor: text;
 }
 
-section[id] {
-  scroll-margin-top: 72px;
+/*
+ * Full-screen sections: each home section fills the visible area below the 4rem navbar, content
+ * centred vertically, and the page settles gently at section starts ("proximity" never traps a
+ * section that is taller than the screen).
+ */
+html {
+  scroll-padding-top: 4rem;
+  scroll-snap-type: y proximity;
+}
+
+@utility screen-section {
+  min-height: calc(100svh - 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  scroll-snap-align: start;
 }
 
 @utility text-balance {
@@ -213,5 +227,34 @@ section[id] {
   &:focus-visible,
   :where(.group):hover & {
     background-size: 100% 1px;
+  }
+}
+
+/* --- The Growth Atlas (photo gallery) --- */
+@keyframes atlas-glide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .atlas-track {
+    animation-name: atlas-glide;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  .lightbox-in {
+    animation: load-wipe 0.9s var(--ease-out) both;
+  }
+}
+
+/* Without motion, the rows become swipeable/scrollable instead of gliding. */
+@media (prefers-reduced-motion: reduce) {
+  .atlas-track {
+    overflow-x: auto;
+    width: 100%;
   }
 }

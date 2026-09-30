@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { projectsController } from '../controllers/projects.controller';
 import {
   experienceController,
+  galleryController,
   servicesController,
   skillsController,
   testimonialsController,
@@ -27,6 +28,7 @@ publicRouter.get('/services/:slug', validate({ params: slugParams }), servicesCo
 publicRouter.get('/testimonials', testimonialsController.publicList);
 publicRouter.get('/skills', skillsController.publicList);
 publicRouter.get('/experience', experienceController.publicList);
+publicRouter.get('/gallery', galleryController.publicList);
 
 publicRouter.post('/contact', formLimiter, validate({ body: contactBody }), submitContact);
 publicRouter.post('/quotes', formLimiter, validate({ body: quoteBody }), submitQuote);

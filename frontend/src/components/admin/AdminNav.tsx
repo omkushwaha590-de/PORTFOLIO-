@@ -12,6 +12,7 @@ const SECTIONS = [
   {
     title: 'Content',
     links: [
+      { href: '/admin/gallery', label: 'The Growth Atlas' },
       { href: '/admin/projects', label: 'Projects' },
       { href: '/admin/services', label: 'Expertise' },
       { href: '/admin/experience', label: 'Experience' },

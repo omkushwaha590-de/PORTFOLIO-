@@ -106,7 +106,7 @@ export interface SiteSettings {
     photoUrl: string;
     photoAlt: string;
   };
-  stats: { value: string; label: string }[];
+  stats: { value: string; label: string; icon?: string }[];
   contactEmail: string;
   location: string;
   resumeUrl: string;
@@ -115,6 +115,15 @@ export interface SiteSettings {
   projectTypes: string[];
   budgetOptions: string[];
   timelineOptions: string[];
+}
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  image: Media;
+  location: string;
+  year: string;
+  order: number;
 }
 
 export interface ApiErrorBody {

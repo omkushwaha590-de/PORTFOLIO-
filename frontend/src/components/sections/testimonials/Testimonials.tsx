@@ -3,13 +3,13 @@ import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { Testimonial } from '@/types/api';
 
 /** Shown only when real, published testimonials exist. Nothing is ever shown as a placeholder. */
-export function Testimonials({ testimonials }: { testimonials: Testimonial[] }) {
+export function Testimonials({ testimonials, index = '06' }: { testimonials: Testimonial[]; index?: string }) {
   if (testimonials.length === 0) return null;
 
   return (
-    <section aria-labelledby="testimonials-title" className="py-20 sm:py-28">
+    <section aria-labelledby="testimonials-title" className="screen-section py-20 sm:py-24">
       <Container>
-        <SectionHeading index="07" label="References" id="testimonials-title" title="What colleagues say." />
+        <SectionHeading index={index} label="References" id="testimonials-title" title="What colleagues say." />
         <ul className="mt-14 grid gap-x-8 md:grid-cols-2">
           {testimonials.map((item, index) => (
             <li key={item.id} data-reveal="rise" style={delay((index % 2) * 120)} className="border-t border-line py-8">

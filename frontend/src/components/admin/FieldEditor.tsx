@@ -183,9 +183,23 @@ function PairsEditor({
     <fieldset className="space-y-2">
       <legend className="mb-1.5 text-sm text-fg">{field.label}</legend>
       {value.map((row, index) => (
-        <div key={index} className="grid grid-cols-[1fr_2fr_auto] gap-2">
+        <div key={index} className={cn('grid gap-2', field.select ? 'grid-cols-[1fr_2fr_1.3fr_auto]' : 'grid-cols-[1fr_2fr_auto]')}>
           <input aria-label={`${field.keyLabels[0]} ${index + 1}`} placeholder={field.keyLabels[0]} value={row[a] ?? ''} onChange={(e) => update(index, a, e.target.value)} className={inputClass} />
           <input aria-label={`${field.keyLabels[1]} ${index + 1}`} placeholder={field.keyLabels[1]} value={row[b] ?? ''} onChange={(e) => update(index, b, e.target.value)} className={inputClass} />
+          {field.select && (
+            <select
+              aria-label={`${field.select.label} ${index + 1}`}
+              value={row[field.select.key] ?? ''}
+              onChange={(e) => update(index, field.select!.key, e.target.value)}
+              className={inputClass}
+            >
+              {field.select.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          )}
           <button type="button" className={smallButton} onClick={() => onChange(value.filter((_, i) => i !== index))}>
             Remove
           </button>

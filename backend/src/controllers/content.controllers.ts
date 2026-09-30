@@ -1,4 +1,5 @@
 import { Experience } from '../models/experience.model';
+import { GalleryItem } from '../models/gallery.model';
 import { Service } from '../models/service.model';
 import { Skill } from '../models/skill.model';
 import { Testimonial } from '../models/testimonial.model';
@@ -11,3 +12,5 @@ export const testimonialsController = createContentCrud({ model: Testimonial, la
 export const skillsController = createContentCrud({ model: Skill, label: 'Skill' });
 
 export const experienceController = createContentCrud({ model: Experience, label: 'Experience entry' });
+
+export const galleryController = createContentCrud({ model: GalleryItem, label: 'Gallery photo' });

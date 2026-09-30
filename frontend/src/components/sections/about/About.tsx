@@ -9,7 +9,7 @@ interface AboutProps {
   skills: Skill[];
 }
 
-export function About({ settings, experience, skills }: AboutProps) {
+export function About({ settings, experience, skills, index = '01' }: AboutProps & { index?: string }) {
   const { profile } = settings;
   const currentRole = experience.find((entry) => entry.kind === 'work' && entry.current);
   const currentStudy = experience.find((entry) => entry.kind === 'education' && entry.current);
@@ -34,28 +34,19 @@ export function About({ settings, experience, skills }: AboutProps) {
   const rest = paragraphs(split > 0 ? text.slice(split + 1) : '');
 
   return (
-    <section id="about" aria-labelledby="about-title" className="bg-bg-alt py-20 sm:py-28">
+    <section id="about" aria-labelledby="about-title" className="screen-section bg-bg-alt py-20 sm:py-24">
       <Container>
-        <SectionHeading index="01" label="About" id="about-title" title={lead || 'About'} />
+        <SectionHeading index={index} label="About" id="about-title" title={lead || 'About'} />
 
-        <div className="mt-14 grid gap-10 lg:grid-cols-12 lg:gap-8">
-          <div className="hidden lg:col-span-3 lg:block" />
-
-          <div className="space-y-5 text-base leading-relaxed text-muted text-pretty sm:text-lg lg:col-span-5">
-            {rest.map((paragraph, index) => (
-              <p key={index} data-reveal="rise" style={delay(index * 110)}>
-                {paragraph}
-              </p>
-            ))}
-          </div>
-
+        <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-8">
+          {/* Key facts fill the left column; the story reads on the right. */}
           {facts.length > 0 && (
-            <dl className="lg:col-span-4">
-              {facts.map((fact, index) => (
+            <dl className="order-last lg:order-none lg:col-span-4">
+              {facts.map((fact, i) => (
                 <div
                   key={fact.label}
                   data-reveal="rise"
-                  style={delay(120 + index * 90)}
+                  style={delay(i * 90)}
                   className="group border-t border-line py-4 first:border-t-fg"
                 >
                   <dt className="font-mono text-[11px] text-subtle uppercase transition-colors duration-300 group-hover:text-accent">
@@ -68,6 +59,14 @@ export function About({ settings, experience, skills }: AboutProps) {
               ))}
             </dl>
           )}
+
+          <div className="space-y-5 text-base leading-relaxed text-muted text-pretty sm:text-lg lg:col-span-7 lg:col-start-6">
+            {rest.map((paragraph, i) => (
+              <p key={i} data-reveal="rise" style={delay(120 + i * 110)}>
+                {paragraph}
+              </p>
+            ))}
+          </div>
         </div>
       </Container>
     </section>

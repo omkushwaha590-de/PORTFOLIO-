@@ -16,7 +16,16 @@ export type FieldDef =
       options: string[] | ((settings: SiteSettings) => string[]);
     }
   | { type: 'list'; name: string; label: string; hint?: string; max?: number }
-  | { type: 'pairs'; name: string; label: string; keys: [string, string]; keyLabels: [string, string]; hint?: string }
+  | {
+      type: 'pairs';
+      name: string;
+      label: string;
+      keys: [string, string];
+      keyLabels: [string, string];
+      hint?: string;
+      /** Optional third column rendered as a dropdown. */
+      select?: { key: string; label: string; options: { value: string; label: string }[] };
+    }
   | { type: 'media'; name: string; label: string; hint?: string }
   | { type: 'mediaList'; name: string; label: string; hint?: string }
   | { type: 'image'; name: string; label: string; hint?: string };
@@ -38,6 +47,8 @@ export interface ResourceConfig {
   hasFeatured: boolean;
   /** Link to the item on the public site, when it has its own page. */
   publicPath?: (item: Record<string, unknown>) => string | null;
+  /** Small preview image shown in the list. */
+  thumbnail?: (item: Record<string, unknown>) => string | undefined;
   groups: FieldGroup[];
 }
 
@@ -156,6 +167,30 @@ export const RESOURCES: Record<string, ResourceConfig> = {
         ],
       },
       { title: 'Publishing', fields: [STATUS, ORDER, { type: 'checkbox', name: 'featured', label: 'Featured' }] },
+    ],
+  },
+
+  gallery: {
+    key: 'gallery',
+    label: 'The Growth Atlas',
+    singular: 'Photo',
+    tags: ['gallery'],
+    titleField: 'title',
+    subtitle: (item) => [item.location, item.year].filter(Boolean).join(' · '),
+    hasStatus: true,
+    hasFeatured: false,
+    thumbnail: (item) => (item.image as { url?: string } | undefined)?.url,
+    groups: [
+      {
+        title: 'Photo',
+        fields: [
+          { type: 'media', name: 'image', label: 'Photo', hint: 'Upload a JPEG, PNG or WebP (max 5 MB). Add a short description for screen readers.' },
+          { type: 'text', name: 'title', label: 'Title', required: true, max: 150, hint: 'Shown on the photo and in the viewer.' },
+          { type: 'text', name: 'location', label: 'Location', max: 120, half: true, hint: 'E.g. Billund, Denmark' },
+          { type: 'text', name: 'year', label: 'Year', max: 20, half: true },
+        ],
+      },
+      { title: 'Publishing', fields: [STATUS, ORDER] },
     ],
   },
 

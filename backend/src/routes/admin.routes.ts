@@ -5,6 +5,7 @@ import { env } from '../config/env';
 import { adminListQuery } from '../controllers/content-crud.factory';
 import {
   experienceController,
+  galleryController,
   servicesController,
   skillsController,
   testimonialsController,
@@ -18,6 +19,7 @@ import { requireAuth } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { idParams, reorderBody } from '../validators/common';
 import { experienceCreateBody, experienceUpdateBody } from '../validators/experience.schema';
+import { galleryCreateBody, galleryUpdateBody } from '../validators/gallery.schema';
 import { adminProjectListQuery, projectCreateBody, projectUpdateBody } from '../validators/project.schema';
 import { serviceCreateBody, serviceUpdateBody } from '../validators/service.schema';
 import { settingsUpdateBody } from '../validators/settings.schema';
@@ -64,6 +66,7 @@ mountContent('/services', servicesController, { create: serviceCreateBody, updat
 mountContent('/testimonials', testimonialsController, { create: testimonialCreateBody, update: testimonialUpdateBody });
 mountContent('/skills', skillsController, { create: skillCreateBody, update: skillUpdateBody });
 mountContent('/experience', experienceController, { create: experienceCreateBody, update: experienceUpdateBody });
+mountContent('/gallery', galleryController, { create: galleryCreateBody, update: galleryUpdateBody });
 
 // Inbox: contact messages and quotation requests
 adminRouter.get('/messages', validate({ query: messageListQuery }), messagesController.list);

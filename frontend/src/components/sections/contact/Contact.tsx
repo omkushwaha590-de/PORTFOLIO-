@@ -4,11 +4,11 @@ import { Container } from '@/components/ui/Container';
 import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { SiteSettings } from '@/types/api';
 
-export function Contact({ settings }: { settings: SiteSettings }) {
+export function Contact({ settings, index = '07' }: { settings: SiteSettings; index?: string }) {
   return (
-    <section id="contact" aria-labelledby="contact-title" className="bg-bg-deep py-20 sm:py-28">
+    <section id="contact" aria-labelledby="contact-title" className="screen-section bg-bg-deep py-20 sm:py-24">
       <Container>
-        <SectionHeading index="08" label="Contact" id="contact-title" title="Let’s talk about your quality or operations challenge." />
+        <SectionHeading index={index} label="Contact" id="contact-title" title="Let’s talk about your quality or operations challenge." />
 
         <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-8">
           <div data-reveal="rise" className="space-y-8 lg:col-span-3">

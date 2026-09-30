@@ -15,14 +15,14 @@ const GROUPS: { kind: ExperienceKind; title: string }[] = [
   { kind: 'recognition', title: 'Recognition' },
 ];
 
-export function Journey({ experience }: { experience: Experience[] }) {
+export function Journey({ experience, index = '05' }: { experience: Experience[]; index?: string }) {
   if (experience.length === 0) return null;
   const roles = experience.filter((entry) => entry.kind === 'work');
 
   return (
-    <section id="journey" aria-labelledby="journey-title" className="bg-bg-alt py-20 sm:py-28">
+    <section id="journey" aria-labelledby="journey-title" className="screen-section bg-bg-alt py-20 sm:py-24">
       <Container>
-        <SectionHeading index="06" label="Experience" id="journey-title" title="Sixteen years in industrial manufacturing." />
+        <SectionHeading index={index} label="Experience" id="journey-title" title="Sixteen years in industrial manufacturing." />
 
         {roles.length > 0 && (
           <ol className="mt-14">

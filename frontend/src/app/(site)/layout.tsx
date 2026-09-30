@@ -3,12 +3,12 @@ import { CustomCursor } from '@/components/layout/CustomCursor';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
 import { RevealObserver } from '@/components/motion/RevealObserver';
-import { getSettings } from '@/lib/api/server';
+import { getGallery, getSettings } from '@/lib/api/server';
 
 export default async function SiteLayout({ children }: LayoutProps<'/'>) {
   // Render per request so the CSP nonce from src/proxy.ts can be applied (API data is still cached).
   await connection();
-  const settings = await getSettings();
+  const [settings, gallery] = await Promise.all([getSettings(), getGallery()]);
 
   return (
     <>
@@ -19,7 +19,7 @@ export default async function SiteLayout({ children }: LayoutProps<'/'>) {
         Skip to content
       </a>
       <div id="top" />
-      <Navbar name={settings.profile.name || settings.siteName} />
+      <Navbar name={settings.profile.name || settings.siteName} hiddenLinks={gallery.length === 0 ? ['/#gallery'] : []} />
       <main id="main" className="pt-16">
         {children}
       </main>

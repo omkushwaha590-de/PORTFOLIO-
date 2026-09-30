@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { STAT_ICONS } from '../models/settings.model';
 import { httpUrl, imageSrc, optionalUrl, requiredText, stringList, text } from './common';
 
 export const settingsUpdateBody = z
@@ -25,7 +26,15 @@ export const settingsUpdateBody = z
       .strict()
       .optional(),
     stats: z
-      .array(z.object({ value: requiredText(20), label: requiredText(80) }).strict())
+      .array(
+        z
+          .object({
+            value: requiredText(20),
+            label: requiredText(80),
+            icon: z.enum(STAT_ICONS).or(z.literal('')).default(''),
+          })
+          .strict(),
+      )
       .max(8)
       .optional(),
     contactEmail: z.union([z.string().trim().email().max(254), z.literal('')]).optional(),

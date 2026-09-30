@@ -11,6 +11,7 @@ interface Dashboard {
     skills: number;
     newMessages: number;
     newQuotes: number;
+    gallery?: number;
   };
   recentMessages: { id: string; name: string; email: string; company: string; status: string; createdAt: string }[];
   recentQuotes: { id: string; name: string; email: string; projectType: string; status: string; createdAt: string }[];
@@ -24,7 +25,7 @@ export default async function DashboardPage() {
     { label: 'New messages', value: counts.newMessages, href: '/admin/inbox/messages?status=new' },
     { label: 'New inquiries', value: counts.newQuotes, href: '/admin/inbox/quotes?status=new' },
     { label: 'Published projects', value: `${counts.publishedProjects}/${counts.projects}`, href: '/admin/projects' },
-    { label: 'Expertise areas', value: counts.services, href: '/admin/services' },
+    { label: 'Growth Atlas photos', value: counts.gallery ?? 0, href: '/admin/gallery' },
   ];
 
   return (

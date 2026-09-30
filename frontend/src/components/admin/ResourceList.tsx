@@ -79,7 +79,13 @@ export function ResourceList({ resource, initialItems }: { resource: string; ini
           const publicLink = config.publicPath?.(item);
           return (
             <li key={item.id} className="grid gap-3 border-b border-line py-4 lg:grid-cols-[3rem_1fr_auto] lg:items-center">
-              <span className="font-mono text-xs text-subtle">{String(index + 1).padStart(2, '0')}</span>
+              {config.thumbnail?.(item) ? (
+                // Plain <img>: admin previews may point at any uploaded URL.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={config.thumbnail(item)} alt="" className="size-12 bg-surface object-cover" />
+              ) : (
+                <span className="font-mono text-xs text-subtle">{String(index + 1).padStart(2, '0')}</span>
+              )}
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link href={`/admin/${config.key}/${item.id}`} className="font-medium hover:underline hover:underline-offset-4">

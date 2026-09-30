@@ -1,5 +1,5 @@
 import 'server-only';
-import type { Experience, Project, ProjectCard, ProjectLink, Service, SiteSettings, Skill, Testimonial } from '@/types/api';
+import type { Experience, GalleryItem, Project, ProjectCard, ProjectLink, Service, SiteSettings, Skill, Testimonial } from '@/types/api';
 import { fallbackSettings } from './fallbacks';
 
 const BACKEND_URL = (process.env.BACKEND_URL ?? 'http://localhost:4000').replace(/\/$/, '');
@@ -71,4 +71,8 @@ export async function getSkills(): Promise<Skill[]> {
 
 export async function getExperience(): Promise<Experience[]> {
   return (await getJson<Experience[]>('/experience', ['experience']))?.data ?? [];
+}
+
+export async function getGallery(): Promise<GalleryItem[]> {
+  return (await getJson<GalleryItem[]>('/gallery', ['gallery']))?.data ?? [];
 }

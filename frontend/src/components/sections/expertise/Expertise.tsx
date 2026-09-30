@@ -4,14 +4,14 @@ import { pad } from '@/lib/utils';
 import type { Service } from '@/types/api';
 
 /** Numbered, ruled list, like an index in a technical report. */
-export function Expertise({ services }: { services: Service[] }) {
+export function Expertise({ services, index = '04' }: { services: Service[]; index?: string }) {
   if (services.length === 0) return null;
 
   return (
-    <section id="expertise" aria-labelledby="expertise-title" className="py-20 sm:py-28">
+    <section id="expertise" aria-labelledby="expertise-title" className="screen-section py-20 sm:py-24">
       <Container>
         <SectionHeading
-          index="02"
+          index={index}
           label="Expertise"
           id="expertise-title"
           title="Engineering depth, with a view of the business."

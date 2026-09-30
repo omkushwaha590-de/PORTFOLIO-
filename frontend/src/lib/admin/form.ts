@@ -74,8 +74,13 @@ export function toPayload(fields: FieldDef[], state: FormState, mode: 'create' |
         break;
       case 'pairs': {
         const [a, b] = field.keys;
+        const extra = field.select?.key;
         body[field.name] = ((value as Record<string, string>[]) ?? [])
-          .map((row) => ({ [a]: (row[a] ?? '').trim(), [b]: (row[b] ?? '').trim() }))
+          .map((row) => ({
+            [a]: (row[a] ?? '').trim(),
+            [b]: (row[b] ?? '').trim(),
+            ...(extra ? { [extra]: row[extra] ?? '' } : {}),
+          }))
           .filter((row) => row[a] && row[b]);
         break;
       }

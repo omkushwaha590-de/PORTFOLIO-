@@ -4,14 +4,14 @@ import { Container } from '@/components/ui/Container';
 import { SectionHeading, delay } from '@/components/ui/SectionHeading';
 import type { ProjectCard as ProjectCardType } from '@/types/api';
 
-export function SelectedWork({ projects, total }: { projects: ProjectCardType[]; total: number }) {
+export function SelectedWork({ projects, total, index = '03' }: { projects: ProjectCardType[]; total: number; index?: string }) {
   if (projects.length === 0) return null;
 
   return (
-    <section id="work" aria-labelledby="work-title" className="bg-bg-deep py-20 sm:py-28">
+    <section id="work" aria-labelledby="work-title" className="screen-section bg-bg-deep py-20 sm:py-24">
       <Container>
         <SectionHeading
-          index="03"
+          index={index}
           label="Selected work"
           id="work-title"
           title="Problems solved, results measured."

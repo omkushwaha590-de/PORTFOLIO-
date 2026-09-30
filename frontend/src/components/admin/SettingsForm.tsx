@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/api/client';
 import { adminApi, refreshPublicSite } from '@/lib/admin/client';
 import { toFormState, toPayload, type FormState, type FormValue } from '@/lib/admin/form';
 import type { FieldDef, FieldGroup } from '@/lib/admin/resources';
+import { STAT_ICON_OPTIONS } from '@/components/ui/StatIcon';
 import { cn } from '@/lib/utils';
 import type { SiteSettings } from '@/types/api';
 import { FieldEditor } from './FieldEditor';
@@ -41,7 +42,8 @@ const GROUPS: FieldGroup[] = [
         label: 'Figures',
         keys: ['value', 'label'],
         keyLabels: ['Value (e.g. 16+)', 'Label'],
-        hint: 'Real numbers only. Up to 8.',
+        select: { key: 'icon', label: 'Icon', options: STAT_ICON_OPTIONS },
+        hint: 'Real numbers only. Up to 8. "Automatic" picks an icon that matches the label.',
       },
     ],
   },

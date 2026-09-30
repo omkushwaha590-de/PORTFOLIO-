@@ -2,7 +2,7 @@ import { revalidateTag } from 'next/cache';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const BACKEND_URL = (process.env.BACKEND_URL ?? 'http://localhost:4000').replace(/\/$/, '');
-const ALLOWED_TAGS = new Set(['settings', 'projects', 'services', 'testimonials', 'skills', 'experience']);
+const ALLOWED_TAGS = new Set(['settings', 'projects', 'services', 'testimonials', 'skills', 'experience', 'gallery']);
 
 /**
  * POST /api/revalidate { tags: string[] }
